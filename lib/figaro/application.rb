@@ -57,7 +57,17 @@ module Figaro
     end
 
     def parse(path)
-      File.exist?(path) && YAML.load(ERB.new(File.read(path)).result) || {}
+      return {} unless File.exist?(path)
+
+      source = ERB.new(File.read(path)).result
+      yaml =
+        begin
+          YAML.safe_load(source, aliases: true)
+        rescue ArgumentError
+          YAML.safe_load(source)
+        end
+
+      yaml || {}
     end
 
     def global_configuration
